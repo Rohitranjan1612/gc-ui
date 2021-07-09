@@ -1,25 +1,51 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import styled from 'styled-components';
+import LoginScreen from './container/LoginScreen';
+import SignUpScreen from './container/SignUpScreen';
+import HomeScreen from './container/HomeScreen';
+import ChatScreen from './container/ChatScreen';
+import 'antd/dist/antd.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const OuterContainer = styled.div`
+  display: flex;
+  flex: 1 0;
+  overflow: hidden;
+`;
+
+const RouterContainer = styled.div`
+  display: flex;
+  flex: 1;
+`;
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      modalVisible: true,
+    };
+    console.log({ props });
+  }
+
+  hideModal = () => {
+    this.props.hideError();
+  };
+
+  render() {
+    return (
+      <OuterContainer>
+        <Router>
+          <RouterContainer>
+            <Route path="/" exact  component={LoginScreen}/>
+            <Route path="/sign-up" exact  component={SignUpScreen}/>
+            <Route path="/home" exact  component={HomeScreen}/>
+            <Route path="/chat" exact  component={ChatScreen}/>
+          </RouterContainer>
+        </Router>
+      </OuterContainer>
+    );
+  }
 }
 
 export default App;
