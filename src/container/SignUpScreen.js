@@ -69,7 +69,7 @@ function SignUpScreen(props) {
           props.history.push({
             pathname: "/home",
             state: {
-              data: resp.data ? resp.data.login : null,
+              data: resp.data ? resp.data.signup : null,
             },
           });
         })
