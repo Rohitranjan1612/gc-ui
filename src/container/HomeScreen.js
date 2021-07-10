@@ -70,12 +70,12 @@ function HomeScreen(props) {
   useEffect(() => {
     console.log({ data, props });
     if (props.location.state && props.location.state.data.userId) {
-      setUserDetails(props.location.state.data.userId);
+      setUserDetails(props.location.state.data);
       if (data) {
         setGroups(data.groups);
       }
     } else {
-      props.history.push("/");
+      props.history.replace("/");
     }
   }, [data]);
   return (

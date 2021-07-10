@@ -1,7 +1,12 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Avatar, Input, Button, Popconfirm } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, LeftOutlined } from "@ant-design/icons";
+import { useQuery } from "@apollo/client";
+import MessageForm from "../components/MessageForm";
+import MessageList from "../components/MessageList";
+import { FETCH_ALL_GROUPS } from "../graphql/queries/Groups";
+
 const { TextArea } = Input;
 const OuterContainer = styled.div`
   display: flex;
@@ -16,37 +21,6 @@ const OuterContainer = styled.div`
   max-width: 400px;
   margin: auto;
 `;
-const Footer = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  flex-direction: row;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #f0f3f6;
-`;
-const TitleText = styled.p`
-  font-family: Inter;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 24px;
-  line-height: 24px;
-  color: #0f0b28;
-  margin-top: 10px;
-`;
-const Header = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  width: 100%;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 20px;
-  justify-content: space-between;
-  border-bottom: 1px solid #f0f3f6;
-`;
-
 const BodyContainer = styled.div`
   display: flex;
   flex: 10;
@@ -60,111 +34,83 @@ const BodyContainer = styled.div`
   -webkit-overflow-scrolling: touch;
 `;
 
-const SenderMessageContainer = styled.div`
-  width: 272px;
-  margin-bottom: 10px;
-  background: #f0f3f6;
-  border-radius: 12px;
-`;
-const SenderName = styled.p`
+const TitleText = styled.p`
   font-family: Inter;
   font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 24px;
+  color: #0f0b28;
   margin-top: 10px;
-  margin-left: 10px;
-  margin-bottom: 0px;
-  margin-right: 10px;
-  line-height: 21px;
-  color: #0f0b28;
-`;
-const SenderChatMessage = styled.p`
-  font-family: Inter;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
-  margin-left: 10px;
-  margin-right: 10px;
-  line-height: 21px;
-  color: #0f0b28;
 `;
 
-const SelfMessageContainer = styled.div`
-  width: 272px;
-  background: #092096;
-  margin-bottom: 10px;
-  align-self: flex-end;
-  border-radius: 12px;
+const LeftIcon = styled(LeftOutlined)`
+  size: 24px;
+  color: #0f0b28;
 `;
-const SelfName = styled.p`
-  font-family: Inter;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
-  margin-top: 10px;
-  margin-left: 10px;
-  margin-bottom: 0px;
-  margin-right: 10px;
-  line-height: 21px;
-  color: #ffffff;
+const Header = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  width: 100%;
+  padding-right: 20px;
+  padding-top: 20px;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f3f6;
 `;
-const SelfChatMessage = styled.p`
-  font-family: Inter;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
-  margin-left: 10px;
-  margin-right: 10px;
-  line-height: 21px;
-  color: #ffffff;
+const SubHeader = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: row;
 `;
 
-class ChatScreen extends Component {
-  render() {
-    return (
-      <OuterContainer>
-        <Header>
-          <TitleText>Group Chat</TitleText>
-          <Popconfirm
-            title="Are you sure you want to logout?"
-            placement="bottom"
-            // icon={null}
-            onConfirm={this.logoutUser}
-            cancelText="No"
-            okText="Logout"
+function ChatScreen(props) {
+  const [group, setGroup] = useState({});
+  const [userDetails, setUserDetails] = useState({});
+
+  const { error, loading, data } = useQuery(FETCH_ALL_GROUPS);
+  useEffect(() => {
+    console.log({ data, props });
+    if (props.location.state && props.location.state.data.userDetails.userId) {
+      setUserDetails(props.location.state.data.userDetails);
+      setGroup(props.location.state.data.group);
+    } else {
+      props.history.replace("/");
+    }
+  }, [data]);
+  return (
+    <OuterContainer>
+      <Header>
+        <SubHeader>
+          <Button
+            type="text"
+            style={{ marginTop: 6 }}
+            onClick={() => props.history.goBack()}
           >
+            <LeftIcon />
+          </Button>
+          <TitleText>{group ? group.name : null}</TitleText>
+        </SubHeader>
+        <Popconfirm
+          title="Are you sure you want to logout?"
+          placement="bottom"
+          // icon={null}
+          onConfirm={() => props.history.replace("/")}
+          cancelText="No"
+          okText="Logout"
+        >
           <Avatar
             style={{ backgroundColor: "#87d068", marginTop: 5 }}
             icon={<UserOutlined />}
           />
-          </Popconfirm>
-        </Header>
-        <BodyContainer>
-          <SenderMessageContainer>
-            <SenderName>Group Chat</SenderName>
-            <SenderChatMessage>Group Chat</SenderChatMessage>
-          </SenderMessageContainer>
-          <SelfMessageContainer>
-            <SelfName>Group Chat</SelfName>
-            <SelfChatMessage>Group Chat</SelfChatMessage>
-          </SelfMessageContainer>
-        </BodyContainer>
-        <Footer>
-          <TextArea
-            placeholder="Type a message"
-            style={{ width: "80%", marginRight: 10, marginBottom: 10 }}
-          />
-          <Button
-            type="primary"
-            style={{ marginTop: 10 }}
-            onClick={() => this.props.history.push("/home")}
-          >
-            Send
-          </Button>
-        </Footer>
-      </OuterContainer>
-    );
-  }
+        </Popconfirm>
+      </Header>
+      <BodyContainer>
+        <MessageList userDetails={userDetails} group={group} />
+      </BodyContainer>
+      <MessageForm userDetails={userDetails} group={group} />
+    </OuterContainer>
+  );
 }
 
 export default ChatScreen;
