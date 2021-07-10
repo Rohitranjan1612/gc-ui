@@ -1,7 +1,9 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Avatar, Card, Button } from "antd";
+import { Avatar, Card, Button, Popconfirm } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { useQuery } from "@apollo/client";
+import { FETCH_ALL_GROUPS } from "../graphql/queries/Groups";
 
 const OuterContainer = styled.div`
   display: flex;
@@ -60,43 +62,72 @@ const WelcomeText = styled.p`
   margin-top: 10px;
 `;
 
-class HomeScreen extends Component {
-  render() {
-    return (
-      <OuterContainer>
-        <Header>
-          <TitleText>Group Chat</TitleText>
+function HomeScreen(props) {
+  const [groups, setGroups] = useState([]);
+  const [userDetails, setUserDetails] = useState({});
+
+  const { error, loading, data } = useQuery(FETCH_ALL_GROUPS);
+  useEffect(() => {
+    console.log({ data, props });
+    if (props.location.state && props.location.state.data.userId) {
+      setUserDetails(props.location.state.data.userId);
+      if (data) {
+        setGroups(data.groups);
+      }
+    } else {
+      props.history.push("/");
+    }
+  }, [data]);
+  return (
+    <OuterContainer>
+      <Header>
+        <TitleText>Group Chat</TitleText>
+        <Popconfirm
+          title="Are you sure you want to logout?"
+          placement="bottom"
+          // icon={null}
+          onConfirm={() => props.history.replace("/")}
+          cancelText="No"
+          okText="Logout"
+        >
           <Avatar
             style={{ backgroundColor: "#87d068", marginTop: 5 }}
             icon={<UserOutlined />}
           />
-        </Header>
-        <BodyContainer>
-          <WelcomeText>Welcome to Group Chat!</WelcomeText>
-          <Card
-            title="Default size card"
-            extra={
-              <Button
-                type="link"
-                onClick={() => this.props.history.push("/chat")}
-              >
-                Chat
-              </Button>
-            }
-          >
-            <p>
-              The href attribute requires a valid value to be accessible.
-              Provide a valid, navigable address as the href value. If you
-              cannot provide a valid href, but still need the element to
-              resemble a link, use a button and change it with appropriate
-              styles. Learn more:
-              https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/anchor-is-valid.md
-            </p>
-          </Card>
-        </BodyContainer>
-      </OuterContainer>
-    );
-  }
+        </Popconfirm>
+      </Header>
+      <BodyContainer>
+        <WelcomeText>Welcome to Group Chat!</WelcomeText>
+        {groups.length
+          ? groups.map((group) => {
+              return (
+                <Card
+                  title={group.name}
+                  style={{ marginTop: 10 }}
+                  extra={
+                    <Button
+                      type="link"
+                      onClick={() =>
+                        props.history.push({
+                          pathname: "/chat",
+                          state: {
+                            data: { group, userDetails },
+                          },
+                        })
+                      }
+                    >
+                      Chat
+                    </Button>
+                  }
+                >
+                  <p>{group.description}</p>
+                </Card>
+              );
+            })
+          : null}
+      </BodyContainer>
+    </OuterContainer>
+  );
 }
 
 export default HomeScreen;

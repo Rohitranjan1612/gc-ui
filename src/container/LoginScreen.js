@@ -1,7 +1,9 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { Button, Input } from "antd";
+import { Alert, Button, Input } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { LOGIN_USER_MUTATION } from "../graphql/mutations/Login";
+import { useMutation } from "@apollo/client";
 
 const OuterContainer = styled.div`
   display: flex;
@@ -36,32 +38,75 @@ const style = {
     marginTop: 10,
   },
 };
-class LoginScreen extends Component {
-  render() {
-    return (
-      <OuterContainer>
-        <h1 style={{ marginTop: 40 }}>Group Chat</h1>
-        <TitleText>Kindly login to your account</TitleText>
-        <Input placeholder="Enter Email" style={style.formStyle} />
-        <Input.Password
-          style={style.formStyle}
-          placeholder="Enter Password"
-          iconRender={(visible) =>
-            visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-          }
+function LoginScreen(props) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showError, setShowError] = useState(false);
+
+  const [loginUser] = useMutation(LOGIN_USER_MUTATION);
+
+  const addUser = () => {
+    loginUser({
+      variables: {
+        email: email,
+        password: password,
+      },
+    })
+      .then((resp) => {
+        console.log({ resp });
+        props.history.push({
+          pathname: "/home",
+          state: {
+            data: resp.data ? resp.data.login : null,
+          },
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        setShowError(true);
+      });
+  };
+  return (
+    <OuterContainer>
+      {showError ? (
+        <Alert
+          type="error"
+          message="Someting Went Wrong! Please check you enter correct email and password."
+          banner
+          closable
+          onClose={() => setShowError(false)}
         />
-        <Button style={style.formStyle} type="primary" onClick={() => this.props.history.push("/home")}>
-          Continue
+      ) : null}
+      <h1 style={{ marginTop: 40 }}>Group Chat</h1>
+      <TitleText>Kindly login to your account</TitleText>
+      <Input
+        placeholder="Enter Email"
+        style={style.formStyle}
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
+      />
+      <Input.Password
+        style={style.formStyle}
+        placeholder="Enter Password"
+        onChange={(e) => {
+          setPassword(e.target.value);
+        }}
+        iconRender={(visible) =>
+          visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+        }
+      />
+      <Button style={style.formStyle} type="primary" onClick={addUser}>
+        Continue
+      </Button>
+      <hr style={{ marginTop: 20, width: "80%" }}></hr>
+      <Footer>
+        <Button type="link" onClick={() => props.history.push("/sign-up")}>
+          Sign up for your account
         </Button>
-        <hr style={{ marginTop: 20, width: "80%" }}></hr>
-        <Footer>
-          <Button type="link" onClick={() => this.props.history.push("/sign-up")}>
-            Sign up for your account
-          </Button>
-        </Footer>
-      </OuterContainer>
-    );
-  }
+      </Footer>
+    </OuterContainer>
+  );
 }
 
 export default LoginScreen;
