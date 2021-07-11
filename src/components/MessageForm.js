@@ -29,10 +29,9 @@ const MessageForm = ({ userDetails, group, props }) => {
     if (message.length > 0) {
     addMessage({
       variables: {
-        userName: userDetails.name,
         message,
         groupId: group.groupId ? parseInt(group.groupId) : null,
-        userId: userDetails.userId ? parseInt(userDetails.userId) : null,
+        authToken: userDetails.authToken ? userDetails.authToken : null,
       },
     })
       .then((resp) => {

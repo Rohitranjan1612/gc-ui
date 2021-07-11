@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const FETCH_ALL_GROUPS = gql`
-  {
-    groups {
+  query groups($authToken: String) {
+    groups(authToken: $authToken) {
       description
       groupId
       name
@@ -11,8 +11,8 @@ export const FETCH_ALL_GROUPS = gql`
 `;
 
 export const GET_MESSAGES = gql`
-  query messages($groupId: ID) {
-    messages(groupId: $groupId) {
+  query messages($groupId: ID, $authToken: String) {
+    messages(groupId: $groupId, authToken: $authToken) {
       id
       userId
       groupId

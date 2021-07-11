@@ -2,10 +2,8 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Avatar, Input, Button, Popconfirm } from "antd";
 import { UserOutlined, LeftOutlined } from "@ant-design/icons";
-import { useQuery } from "@apollo/client";
 import MessageForm from "../components/MessageForm";
 import MessageList from "../components/MessageList";
-import { FETCH_ALL_GROUPS } from "../graphql/queries/Groups";
 
 const { TextArea } = Input;
 const OuterContainer = styled.div`
@@ -68,16 +66,14 @@ function ChatScreen(props) {
   const [group, setGroup] = useState({});
   const [userDetails, setUserDetails] = useState({});
 
-  const { error, loading, data } = useQuery(FETCH_ALL_GROUPS);
   useEffect(() => {
-    console.log({ data, props });
     if (props.location.state && props.location.state.data.userDetails.userId) {
       setUserDetails(props.location.state.data.userDetails);
       setGroup(props.location.state.data.group);
     } else {
       props.history.replace("/");
     }
-  }, [data]);
+  }, []);
   return (
     <OuterContainer>
       <Header>

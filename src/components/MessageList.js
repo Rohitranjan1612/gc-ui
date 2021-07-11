@@ -89,7 +89,10 @@ const SelfChatMessageTime = styled.p`
 
 const MessageList = ({ userDetails, group }) => {
   const { data, loading, subscribeToMore } = useQuery(GET_MESSAGES, {
-    variables: { groupId: group.groupId },
+    variables: {
+      groupId: group.groupId,
+      authToken: userDetails.authToken ? userDetails.authToken : null,
+    },
   });
 
   useEffect(() => {
@@ -123,14 +126,18 @@ const MessageList = ({ userDetails, group }) => {
               <SenderName>{message.userName}</SenderName>
               <SenderChatMessage>{message.message}</SenderChatMessage>
               <SenderChatMessageTime>
-                {getFormattedTime(moment())}
+                {message.createdAt
+                  ? getFormattedTime(moment(message.createdAt, "x"))
+                  : getFormattedTime(moment())}
               </SenderChatMessageTime>
             </SenderMessageContainer>
           ) : (
             <SelfMessageContainer>
               <SelfChatMessage>{message.message}</SelfChatMessage>
               <SelfChatMessageTime>
-                {getFormattedTime(moment())}
+                {message.createdAt
+                  ? getFormattedTime(moment(message.createdAt, "x"))
+                  : getFormattedTime(moment())}
               </SelfChatMessageTime>
             </SelfMessageContainer>
           )}

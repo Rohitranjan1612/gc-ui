@@ -66,7 +66,15 @@ function HomeScreen(props) {
   const [groups, setGroups] = useState([]);
   const [userDetails, setUserDetails] = useState({});
 
-  const { error, loading, data } = useQuery(FETCH_ALL_GROUPS);
+  const { error, loading, data } = useQuery(FETCH_ALL_GROUPS, {
+    variables: {
+      authToken:
+        props.location.state && props.location.state.data.authToken
+          ? props.location.state.data.authToken
+          : null,
+    },
+  });
+
   useEffect(() => {
     console.log({ data, props });
     if (props.location.state && props.location.state.data.userId) {
